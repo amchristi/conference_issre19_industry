@@ -1,0 +1,61 @@
+\subsection{\mytool under the hood}
+\label{sec:experiments}
+\mytool combines \HDD with \emph{statement deletion mutation} to provide program
+adaptations. We discuss the design and implementation details in the following
+section.
+
+\subsubsection{Modifications to \HDD for \RASS}
+\label{sec:intutive}
+
+
+(1)  Reduction may incur many small local changes to software based on the
+relaxed specifications. As original HDD setups were designed to quickly converge
+to reduced input that is significantly \emph{smaller} than original input, they
+tend to make bigger chops earlier in the process. As changes to RASS are going
+to be local and smaller, we propose modification to the original algorithm. Our
+algorithm always starts with leaf nodes at highest depth level and it chops
+smallest possible unit at the beginning (statements for our tool).
+
+
+(2) Consider any two statement s1 and s2 existing at the same level in AST in
+the order s1,s2. Our algorithm always deletes s2 before s1. Our deletions are
+always from right to left at the same level in AST. (a) This prevents some
+possibilities of non-compilable code and hence costly reverts, use will always
+be deleted before def. (b) Later read/write will be deleted before earlier
+read/write. Will this have better chance to keep program correct, for Alex to
+answer? Reverts will be needed only if any test in test suite failed.
+
+
+(3) Consider any two statements s1 and s2 existing at a different level in AST
+such that s1 is at a higher level. As our algorithm starts from leaf node and
+moves upward, s2 will be deleted before s1 ensuring that if def and use are at
+different levels, use will be deleted before def, again reducing possibility of
+non-compilable code.
+
+\subsubsection{Algorithm}
+\label{sec:algorithm}
+The basic algorithm, which is a modified version of \HDD is described
+in Algorithm~\ref{alg:hdd}.
+It is modified to fit into adaptation workflow better by deleting the smallest
+nodes first.
+
+\begin{algorithm}
+\caption{Hierarchical Delta Debugging}
+\hrulefill
+\begin{algorithmic}[1]
+\Procedure{hdd}{$inputTree$}
+    \State $level\gets\textsc{HigestDepthLevel}(inputTree)$
+    \State $nodes\gets\textsc{TagNodes}(inputTree,level)$ 
+    \While{nodes are not empty}
+	\State $minConfig\gets\textsc{ddmin}(inputTree)$
+	\State $\textsc{prune}(inputTree,level,minConfig)$
+	\State $level = level - 1$
+	\State $nodes\gets\textsc{TagNodes}(inputTree,level)$ 	
+	\EndWhile
+
+    \State \textbf{return} $level$ 
+\EndProcedure
+\end{algorithmic}
+\label{alg:hdd}
+\end{algorithm}
+

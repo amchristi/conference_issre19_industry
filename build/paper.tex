@@ -1,0 +1,175 @@
+%\documentclass{sig-alternate}
+\documentclass[conference]{IEEEtran}
+
+\usepackage[bookmarks=false, urlcolor=black, linkcolor=black, citecolor=black, colorlinks=true]{hyperref}
+
+\usepackage{graphicx}
+\usepackage{pifont}
+\usepackage{url}
+%\usepackage{code}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{caption}
+\usepackage{algorithm}
+\usepackage{multicol}
+\usepackage{pgfplots}
+%\usepackage{fontspec}
+\usepackage{xspace}
+\usepackage{fancybox}
+\usepackage{code}
+
+\newcommand{\note}[1]{\fbox{\parbox{0.8\linewidth}{\color{red} #1}}}
+
+
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{comment}
+
+\lstdefinestyle{BashInputStyle}{
+  language=java,
+  basicstyle=\small\sffamily,
+  numbers=left,
+  numberstyle=\tiny,
+  numbersep=3pt,
+  frame=tb,
+  linewidth=0.9\linewidth,
+  xleftmargin=0.1\linewidth
+}
+
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+
+%\newcommand{\comment}[1]{}
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\newcommand\mytool{hddRASS\xspace}
+\newcommand\mytitle{Building Resource Adaptations via Test-Based Software Minimization: Application, Challenges, and Opportunities}
+
+\newcommand\RASS{\emph{RASS}\xspace}
+\newcommand\HDD{\emph{hierarchical delta debugging}\xspace}
+\newcommand\sofs{sacrificability of specifications\xspace}
+
+\newcommand\IMU{$M^{+}$\xspace}
+\newcommand\AIMU{mean $M^{+}$\xspace}
+
+\begin{document}
+%
+% paper title
+% Titles are generally capitalized except for words such as a, an, and, as,
+% at, but, by, for, in, nor, of, on, or, the, to and up, which are usually
+% not capitalized unless they are the first or last word of the title.
+% Linebreaks \\ can be used within to get better formatting as desired.
+% Do not put math or special symbols in the title.
+\title{ \mytitle}
+
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+\author{
+\IEEEauthorblockN{Arpit Christi}
+\IEEEauthorblockA{School of Computing\\
+Weber State University\\
+Ogden, UT, USA\\
+arpitchristi@weber.edu}
+\and
+\IEEEauthorblockN{Alex Groce}
+\IEEEauthorblockA{School of Informatics, Computing, and Cyber Systems\\
+Northern Arizona University\\
+Flagstaff, AZ, USA\\
+agroce@gmail.com}
+\and
+\IEEEauthorblockN{Austin Wellman}
+\IEEEauthorblockA{Raytheon BBN \\
+\\
+Boston, MA, USA\\
+austin.wellman@raytheon.com}
+}
+
+%CISPA Helmholtz Center for Information Security Stuhlsatzenhaus 5 Saarbrücken, Saarland 66123 Germany rahul.gopinath@cispa.saarland
+
+
+% conference papers do not typically use \thanks and this command
+% is locked out in conference mode. If really needed, such as for
+% the acknowledgment of grants, issue a \IEEEoverridecommandlockouts
+% after \documentclass
+
+% for over three affiliations, or if they all won't fit within the width
+% of the page, use this alternative format:
+% 
+%\author{\IEEEauthorblockN{Michael Shell\IEEEauthorrefmark{1},
+%Homer Simpson\IEEEauthorrefmark{2},
+%James Kirk\IEEEauthorrefmark{3}, 
+%Montgomery Scott\IEEEauthorrefmark{3} and
+%Eldon Tyrell\IEEEauthorrefmark{4}}
+%\IEEEauthorblockA{\IEEEauthorrefmark{1}School of Electrical and Computer Engineering\\
+%Georgia Institute of Technology,
+%Atlanta, Georgia 30332--0250\\ Email: see http://www.michaelshell.org/contact.html}
+%\IEEEauthorblockA{\IEEEauthorrefmark{2}Twentieth Century Fox, Springfield, USA\\
+%Email: homer@thesimpsons.com}
+%\IEEEauthorblockA{\IEEEauthorrefmark{3}Starfleet Academy, San Francisco, California 96678-2391\\
+%Telephone: (800) 555--1212, Fax: (888) 555--1212}
+%\IEEEauthorblockA{\IEEEauthorrefmark{4}Tyrell Inc., 123 Replicant Street, Los Angeles, California 90210--4321}}
+
+
+
+
+% use for special paper notices
+%\IEEEspecialpapernotice{(Invited Paper)}
+
+
+
+
+% make the title area
+\maketitle
+
+
+\begin{abstract}
+
+\input{abstract}
+\end{abstract}
+
+\input{introduction}
+
+\input{background}
+
+\input{casestudy}
+
+\input{evaluation}
+\input{challenge}
+\input{tests}
+\input{toolanddata}
+\input{future}
+\input{conclusion}
+
+\bibliographystyle{IEEEtran}
+% argument is your BibTeX string definitions and bibliography database(s)
+
+\def\IEEEbibitemsep{0.6pt plus 0.9pt}
+
+\bibliography{IEEEabrv,bibliography}
+
+\end{document}

@@ -1,0 +1,114 @@
+\section{Computing (1-)Minimal Programs}
+
+The heart of our approach to resource adaptation is the task of converting a
+program to a version that is 1-minimal with respect to a subset of its test
+suite.  We use a custom tool, called \mytool (hierarchical delta debugging +
+Resource Adaptive Software Systems) for this purpose.  From a high-level
+perspective, our tool is very similar to other HDD and delta-debugging tools.
+All such algorithms can be described abstractly by a very simple loop.
+Ignoring the details of the strategy for constructing candidate test cases,
+reducing a test case $t_b$ is accomplished by iterating the following two steps
+until the termination criteria is satisfied:
+
+\begin{enumerate}
+\item Construct the next candidate  reduction of $t_b$, denoted by
+ $t_c$ (where $|t_c| < |t_b|$ because $t_c \subsetneq t_b$).  Terminate if no $t_c$ remain ($t_b$ is 1-minimal).
+\item Execute $t_c$ by calling $\mathit{pred}(t_c)$.  If $\mathit{pred}$ returns {\tt True} then $t_c$ is a  reduction of $t_b$.  Set $t_b = t_c$.
+\end{enumerate}
+
+The purpose of this loop is to reduce a test case (or program) until it has as
+few components as possible, while still satisfying some property.  We adapt this
+by reducing a program (or class, or other program element) $P_b$ rather than a
+test, and by using ``passes a set of tests'' as our $\mathit{pred}$.
+
+From a high level point of view, this change is all that is required to use
+delta-debugging/HDD for resource adaptation.  However, our purposes are quite
+different, which motivates certain modifications that are intended to improve
+performance and effectiveness.
+
+\subsection{Most Programs are Nearly 1-Minimal: Inverted HDD}
+
+Delta-debugging and HDD are aimed at minimizing failing tests.  Frequently, a
+failing test can be reduced in size by one or two orders of magnitude.  Most of
+the test is not relevant to the failure.  Unsurprisingly, this is not the case
+in our context.  It would be a very unusual software system in which the vast
+majority of the code base consisted of optional and sacrificable functionality,
+and we expect most adaptations to remove only a small part of the code base.
+Traditionally HDD begins by attempting to remove large portions of the syntax
+tree by working from coarsest to finest granularity, applying standard
+delta-debugging with each component size selected.  Obviously, unless the set of
+tests chosen has relaxed a great deal of the specification, most classes,
+methods, and other high level parts of a program cannot be removed.  We
+therefore invert the traditional order of HDD and begin by attempting to remove
+the furthest leaf nodes from the root first, then progressively attempt to
+remove larger and larger sub-trees rooted at nodes closer to the top of the
+tree.
+
+\begin{algorithm}
+\caption{Hierarchical Delta Debugging}
+\hrulefill
+\begin{algorithmic}[1]
+\Procedure{hddRASS}{$inputTree$}
+    \State $level\gets\textsc{Height}(inputTree)$
+    \State $nodes\gets\textsc{TagNodes}(inputTree,level)$ 
+    \While{$nodes \not= \emptyset$}
+	\State $minConfig\gets\textsc{ddmin}(nodes,inputTree)$
+	\State $\textsc{prune}(inputTree,level,minConfig)$
+	\State $level = level - 1$
+	\State $nodes\gets\textsc{TagNodes}(inputTree,level)$ 	
+	\EndWhile
+
+%    \State \textbf{return} $inputTree$ 
+\EndProcedure
+\end{algorithmic}
+\label{alg:hdd}
+\end{algorithm}
+
+Here \textsc{ddmin} is the standard delta-debugging
+algorithm~\cite{zeller2002simplifying}, as also used as a subroutine in
+HDD~\cite{misherghi2006hdd}.  We modify \textsc{ddmin} in one additional way:
+we order attempts to reduce at a given level by reverse order of program
+elements.  For example, if there are two statements, $s_1$ and $s_2$, at the
+same level of the syntax tree of the program, we try to remove $s_2$ first,
+since it is possible that $s_2$ depends on $s_1$, but once $s_2$ is removed,
+$s_1$ can be removed.  For instance, consider a method that first opens a file,
+then writes to it four times, then closes it.  Our approach will first remove
+the close, then the writes, then the open.  While the order does not matter in
+all cases, removing the open last is necessary.  Combined with moving upwards
+from deeper nodes (e.g., removing a use of a variable nested in an {\tt if}
+before its declaration in an enclosing context), this limits failed attempts to
+remove code, which are costly when checking the predicate requires running the
+entire test suite.  Since \textsc{ddmin} starts over after every removal, it is
+useful to try likely-successful reduction attempts first.
+
+\subsection{Statement Deletion as Fundamental Operation}
+
+Finally, the above algorithm is still not what \mytool does in practice.  The
+gains in removing code are essentially all obtained by removing statements,
+because statements (including declarations) are the program elements that
+consume resources.  Therefore, \mytool considers the syntax tree of a Java
+program to have leaf nodes that are statements.  It does not attempt to remove
+anything smaller than an entire statement, nor does it attempt to remove classes
+and methods.  If all calls to a method are removed, or all code in the method is
+removed, the effect on resources desired is already obtained, without the
+problem of some modifications making the program fail to compile, without a
+useful effect on resource usage.  At heart, our approach can be thought of as
+combining inverted HDD with the statement deletion mutation
+operator~\cite{deng2013empirical}.  Moreover, focusing on statement deletion as
+our smallest granularity of change means that to reject an adaptation as
+invalid, tests that have not been removed only need detect a fairly coarse
+change to a program, not a subtle modification such as a function parameter
+change or different logical operator.
+
+Note that in theory, Algorithm \ref{alg:hdd} does not guarantee 1-minimality
+with respect to statements in the program, and certainly does not guarantee
+1-tree-minimality~\cite{misherghi2006hdd}.  This can be (for 1-minimality with
+respect to statement components) easily fixed by applying a final pass over all
+statements when the procedure terminates, calling the procedure again if any
+nodes are removed.  In practice, this expensive final step does not seem to
+actually improve results on real Java programs to which we applied our tool, so
+we omit it and assume the minimized program is either 1-minimal or very close to
+1-minimal.  In fact, Misherghi and Su noted in their original paper that
+1-minimality per se is not the primary goal, in any case.  Their original HDD,
+unlike standard delta-debugging, does not guarantee 1-minimality, but in
+practice produced much better reductions in size than standard delta-debugging.
